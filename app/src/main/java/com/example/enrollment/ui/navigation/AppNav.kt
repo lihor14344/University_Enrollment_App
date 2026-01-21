@@ -55,10 +55,6 @@ fun AppNav() {
             ScoresScreen(navController)
         }
 
-        composable("attendance") {
-            AttendanceScreen(navController)
-        }
-
         composable("student_card") {
             StudentCardScreen(navController)
         }

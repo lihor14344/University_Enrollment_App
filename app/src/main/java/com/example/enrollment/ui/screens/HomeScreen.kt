@@ -191,15 +191,14 @@ fun HomeScreen(navController: NavController) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        HomeMenuItem("Attendance", R.drawable.ic_attendance) {
-                            navController.navigate("attendance")
-                        }
                         HomeMenuItem("Student Card", R.drawable.ic_card) {
                             navController.navigate("student_card")
                         }
                         HomeMenuItem("News", R.drawable.ic_news) {
                             navController.navigate("news")
                         }
+                        // Empty space for alignment
+                        Spacer(modifier = Modifier.size(90.dp))
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))

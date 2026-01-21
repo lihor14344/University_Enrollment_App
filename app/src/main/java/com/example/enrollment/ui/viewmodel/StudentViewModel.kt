@@ -59,9 +59,6 @@ class StudentViewModel(
     private val _scoresState = MutableStateFlow<UiState<List<EnrollmentCourseResponse>>>(UiState.Loading)
     val scoresState: StateFlow<UiState<List<EnrollmentCourseResponse>>> = _scoresState
 
-    // Attendance
-    private val _attendanceState = MutableStateFlow<UiState<List<EnrollmentCourseResponse>>>(UiState.Loading)
-    val attendanceState: StateFlow<UiState<List<EnrollmentCourseResponse>>> = _attendanceState
 
     // Student Card
     private val _studentCardState = MutableStateFlow<UiState<StudentCardResponse>>(UiState.Loading)
@@ -165,14 +162,6 @@ class StudentViewModel(
         }
     }
 
-    // Attendance operations
-    fun loadAttendance() {
-        _attendanceState.value = UiState.Loading
-        viewModelScope.launch {
-            val result = studentRepository.getAttendance()
-            _attendanceState.value = result.toUiState()
-        }
-    }
 
     // Student Card operations
     fun loadStudentCard() {

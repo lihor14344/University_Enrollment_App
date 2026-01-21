@@ -72,11 +72,6 @@ class StudentRepository(private val authPreferences: AuthPreferences) {
         return handleApiCall { apiService.getStudentScores() }
     }
 
-    // Attendance
-    suspend fun getAttendance(): Result<List<EnrollmentCourseResponse>> {
-        return handleApiCall { apiService.getStudentAttendance() }
-    }
-
     // Student Card
     suspend fun getStudentCard(): Result<StudentCardResponse> {
         return handleApiCall { apiService.getCard() }
