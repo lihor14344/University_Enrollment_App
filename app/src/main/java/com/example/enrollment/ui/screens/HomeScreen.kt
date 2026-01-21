@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,14 +19,23 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.enrollment.R
+import com.example.enrollment.viewmodel.ProfileState
+import com.example.enrollment.viewmodel.StudentViewModel
 
 
 
 
 @Composable
 fun HomeScreen(navController: NavController) {
+    val studentViewModel: StudentViewModel = viewModel()
+    val profileState by studentViewModel.profileState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        studentViewModel.fetchProfile()
+    }
 
     Box(
         modifier = Modifier
@@ -122,16 +134,49 @@ fun HomeScreen(navController: NavController) {
                                 .background(Color.Gray),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("R", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            when (profileState) {
+                                is ProfileState.Success -> {
+                                    val name = (profileState as ProfileState.Success).profile.user.name
+                                    val initial = name.firstOrNull()?.toString() ?: "U"
+                                    Text(initial, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                }
+                                else -> Text("U", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
                         }
 
                         Spacer(modifier = Modifier.width(4.dp))
 
-                        Text(
-                            text = "Ratha Phaeron",
-                            fontSize = 12.sp,
-                            color = Color.Gray
-                        )
+                        when (profileState) {
+                            is ProfileState.Success -> {
+                                val name = (profileState as ProfileState.Success).profile.user.name
+                                Text(
+                                    text = name,
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                            is ProfileState.Loading -> {
+                                Text(
+                                    text = "Loading...",
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                            is ProfileState.Error -> {
+                                Text(
+                                    text = "Error",
+                                    fontSize = 12.sp,
+                                    color = Color.Red
+                                )
+                            }
+                            else -> {
+                                Text(
+                                    text = "User",
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
                     }
                 }
 

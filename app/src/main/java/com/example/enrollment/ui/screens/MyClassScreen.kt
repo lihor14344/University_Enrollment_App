@@ -16,9 +16,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import com.example.enrollment.viewmodel.EnrollmentCoursesState
+import com.example.enrollment.viewmodel.StudentViewModel
 
 // ----- Data Models -----
 data class ClassSession(
@@ -88,6 +91,13 @@ val sampleSchedules = listOf(
 // ----- Main Screen -----
 @Composable
 fun MyClassScreen(navController: NavHostController) {
+    val studentViewModel: StudentViewModel = viewModel()
+    val enrollmentCoursesState by studentViewModel.enrollmentCoursesState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        studentViewModel.fetchEnrollmentCourses()
+    }
+
     var isDailyView by remember { mutableStateOf(true) }
     var selectedDayIndex by remember { mutableStateOf(0) }
     val verticalScrollState = rememberScrollState()
@@ -152,38 +162,67 @@ fun MyClassScreen(navController: NavHostController) {
 
         // ----- Daily / Weekly content -----
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            if (isDailyView) {
-                // Horizontal date selector
-                Row(
-                    modifier = Modifier
-                        .horizontalScroll(rememberScrollState())
-                ) {
-                    sampleSchedules.forEachIndexed { index, day ->
-                        Button(
-                            onClick = { selectedDayIndex = index },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (selectedDayIndex == index) Color(0xFF4285F4) else Color.LightGray
-                            ),
-                            modifier = Modifier.padding(end = 8.dp)
-                        ) {
-                            Text("${day.dayName.take(3)}\n${day.date}", color = Color.White, fontSize = 12.sp)
-                        }
+            when (enrollmentCoursesState) {
+                is EnrollmentCoursesState.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Show only selected day's schedule
-                DayScheduleCard(sampleSchedules[selectedDayIndex])
-            } else {
-                // Weekly View → show all days
-                sampleSchedules.forEach { day ->
-                    DayScheduleCard(day)
-                    Spacer(modifier = Modifier.height(16.dp))
+                is EnrollmentCoursesState.Success -> {
+                    // Use sample data for now, but we have fetched courses
+                    DisplayScheduleContent(isDailyView, selectedDayIndex) { newIndex ->
+                        selectedDayIndex = newIndex
+                    }
+                }
+                is EnrollmentCoursesState.Error -> {
+                    Text("Error: ${(enrollmentCoursesState as EnrollmentCoursesState.Error).message}", color = Color.Red)
+                    DisplayScheduleContent(isDailyView, selectedDayIndex) { newIndex ->
+                        selectedDayIndex = newIndex
+                    }
+                }
+                else -> {
+                    DisplayScheduleContent(isDailyView, selectedDayIndex) { newIndex ->
+                        selectedDayIndex = newIndex
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+fun DisplayScheduleContent(isDailyView: Boolean, selectedDayIndex: Int, onDaySelected: (Int) -> Unit) {
+    if (isDailyView) {
+        // Horizontal date selector
+        Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+        ) {
+            sampleSchedules.forEachIndexed { index, day ->
+                Button(
+                    onClick = { onDaySelected(index) },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (selectedDayIndex == index) Color(0xFF4285F4) else Color.LightGray
+                    ),
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Text("${day.dayName.take(3)}\n${day.date}", color = Color.White, fontSize = 12.sp)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Show only selected day's schedule
+        DayScheduleCard(sampleSchedules[selectedDayIndex])
+    } else {
+        // Weekly View → show all days
+        sampleSchedules.forEach { day ->
+            DayScheduleCard(day)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
 }
 
 
