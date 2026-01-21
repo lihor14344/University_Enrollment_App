@@ -1,5 +1,8 @@
 package com.example.enrollment.model.auth
 
+import com.example.enrollment.model.student.Student
+import com.example.enrollment.model.user.User
+
 data class LoginResponse(
     val status: Boolean,
     val message: String,
