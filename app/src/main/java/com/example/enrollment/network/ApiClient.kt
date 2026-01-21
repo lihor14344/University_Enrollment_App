@@ -9,13 +9,13 @@ object ApiClient {
 
     private const val BASE_URL = "http://127.0.0.1:8000/api/"
 
-    fun create(tokenProvider: () -> String?): Retrofit {
+    fun create(token: String? = null): Retrofit {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
         val client = OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor(tokenProvider))
+            .addInterceptor(AuthInterceptor(token))
             .addInterceptor(logging)
             .build()
 

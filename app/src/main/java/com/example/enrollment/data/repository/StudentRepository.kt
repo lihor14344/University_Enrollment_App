@@ -23,7 +23,7 @@ import retrofit2.Response
 class StudentRepository(private val authPreferences: AuthPreferences) {
 
     private val apiService: ApiService by lazy {
-        ApiClient.create { authPreferences.authToken.first() }.create(ApiService::class.java)
+        ApiClient.create(authPreferences.getCurrentToken()).create(ApiService::class.java)
     }
 
     // Profile

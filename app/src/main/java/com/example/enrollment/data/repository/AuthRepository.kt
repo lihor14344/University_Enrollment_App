@@ -11,7 +11,7 @@ import retrofit2.Response
 class AuthRepository(private val authPreferences: AuthPreferences) {
 
     private val apiService: ApiService by lazy {
-        ApiClient.create { authPreferences.authToken.first() }.create(ApiService::class.java)
+        ApiClient.create(authPreferences.getCurrentToken()).create(ApiService::class.java)
     }
 
     suspend fun login(loginRequest: LoginRequest): Result<LoginResponse> {
@@ -36,6 +36,6 @@ class AuthRepository(private val authPreferences: AuthPreferences) {
     }
 
     fun getToken(): String? {
-        return authPreferences.authToken.first()
+        return authPreferences.getCurrentToken()
     }
 }
