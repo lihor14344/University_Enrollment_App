@@ -169,21 +169,17 @@ fun MyClassScreen(navController: NavHostController) {
                     }
                 }
                 is EnrollmentCoursesState.Success -> {
-                    // Use sample data for now, but we have fetched courses
-                    DisplayScheduleContent(isDailyView, selectedDayIndex) { newIndex ->
-                        selectedDayIndex = newIndex
-                    }
+                    val courses = (enrollmentCoursesState as EnrollmentCoursesState.Success).courses
+                    DisplayEnrollmentCourses(courses)
                 }
                 is EnrollmentCoursesState.Error -> {
                     Text("Error: ${(enrollmentCoursesState as EnrollmentCoursesState.Error).message}", color = Color.Red)
-                    DisplayScheduleContent(isDailyView, selectedDayIndex) { newIndex ->
-                        selectedDayIndex = newIndex
-                    }
+                    // Show empty list on error
+                    DisplayEnrollmentCourses(emptyList())
                 }
                 else -> {
-                    DisplayScheduleContent(isDailyView, selectedDayIndex) { newIndex ->
-                        selectedDayIndex = newIndex
-                    }
+                    // Show empty list for idle
+                    DisplayEnrollmentCourses(emptyList())
                 }
             }
         }
@@ -285,6 +281,31 @@ fun ClassCard(session: ClassSession) {
             Text("🕒 ${session.time}", fontSize = 12.sp)
             Text("📍 ${session.room}", fontSize = 12.sp)
             Text("👨‍🏫 ${session.lecturer}", fontSize = 12.sp)
+        }
+    }
+}
+
+// ----- Display Enrollment Courses -----
+@Composable
+fun DisplayEnrollmentCourses(courses: List<com.example.enrollment.model.student.EnrollmentCourseResponse>) {
+    if (courses.isEmpty()) {
+        Text("No enrolled courses found.", modifier = Modifier.padding(16.dp))
+    } else {
+        Column {
+            courses.forEach { course ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFBBDEFB))
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text("Course ID: ${course.course_id}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Enrollment ID: ${course.enrollment_id}", fontSize = 12.sp)
+                    }
+                }
+            }
         }
     }
 }

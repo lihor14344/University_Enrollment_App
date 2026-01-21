@@ -30,10 +30,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.enrollment.viewmodel.StudentViewModel
+import com.example.enrollment.viewmodel.UploadCardState
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun StudentCardUploadScreen(navController: NavController) {
+    val studentViewModel: StudentViewModel = viewModel()
+    val uploadState by studentViewModel.uploadCardState.collectAsState()
     var state by remember { mutableStateOf(UploadState.UPLOAD) }
 
     Column(
@@ -77,7 +86,9 @@ fun StudentCardUploadScreen(navController: NavController) {
                 fadeIn().togetherWith(fadeOut())
             }) { currentState ->
                 if (currentState == UploadState.UPLOAD) {
-                    UploadContent { state = UploadState.SUCCESS }
+                    UploadContent { frontPart, backPart ->
+                        studentViewModel.uploadStudentCard(frontPart, backPart)
+                    }
                 } else {
                     SuccessContent {
                         state = UploadState.UPLOAD
@@ -85,12 +96,26 @@ fun StudentCardUploadScreen(navController: NavController) {
                     }
                 }
             }
+
+            // Handle upload state
+            LaunchedEffect(uploadState) {
+                when (uploadState) {
+                    is UploadCardState.Success -> {
+                        state = UploadState.SUCCESS
+                    }
+                    is UploadCardState.Error -> {
+                        // Handle error, maybe show toast
+                    }
+                    else -> {}
+                }
+            }
         }
     }
 }
 
 @Composable
-fun UploadContent(onSubmit: () -> Unit) {
+fun UploadContent(onSubmit: (MultipartBody.Part, MultipartBody.Part) -> Unit) {
+    val context = LocalContext.current
     // State to store front and back image URIs
     var frontImageUri by remember { mutableStateOf<Uri?>(null) }
     var backImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -149,7 +174,17 @@ fun UploadContent(onSubmit: () -> Unit) {
 
             // Submit Button (disabled if images not uploaded)
             Button(
-                onClick = onSubmit,
+                onClick = {
+                    frontImageUri?.let { frontUri ->
+                        backImageUri?.let { backUri ->
+                            val frontPart = uriToMultipartBodyPart(context, frontUri, "front_image")
+                            val backPart = uriToMultipartBodyPart(context, backUri, "back_image")
+                            if (frontPart != null && backPart != null) {
+                                onSubmit(frontPart, backPart)
+                            }
+                        }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -306,4 +341,18 @@ fun SuccessContent(onBack: () -> Unit) {
 
 enum class UploadState {
     UPLOAD, SUCCESS
+}
+
+fun uriToMultipartBodyPart(context: android.content.Context, uri: Uri, name: String): MultipartBody.Part? {
+    return try {
+        val inputStream = context.contentResolver.openInputStream(uri)
+        val file = File(context.cacheDir, "temp_$name.jpg")
+        file.outputStream().use { output ->
+            inputStream?.copyTo(output)
+        }
+        val requestBody = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
+        MultipartBody.Part.createFormData(name, file.name, requestBody)
+    } catch (e: Exception) {
+        null
+    }
 }

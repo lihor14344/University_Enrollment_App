@@ -29,14 +29,25 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.Image
 import com.example.enrollment.R
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.enrollment.viewmodel.StudentViewModel
+import com.example.enrollment.viewmodel.ProfileState
+import com.example.enrollment.viewmodel.UpdateProfileState
 
 
 
 
 @Composable
 fun UserProfileScreen(onBack: () -> Boolean, onLogout: () -> Unit) {
+    val studentViewModel: StudentViewModel = viewModel()
+    val profileState by studentViewModel.profileState.collectAsState()
+    val updateProfileState by studentViewModel.updateProfileState.collectAsState()
     val scrollState = rememberScrollState()
     var selectedTab by remember { mutableStateOf("personal") } // "personal" or "settings"
+
+    LaunchedEffect(Unit) {
+        studentViewModel.fetchProfile()
+    }
 
     Column(
         modifier = Modifier

@@ -1,7 +1,7 @@
 package com.example.enrollment.network
 
-import android.credentials.RegisterCredentialDescriptionRequest
 import com.example.enrollment.model.*
+import com.example.enrollment.model.auth.RegisterRequest
 import com.example.enrollment.model.academic.CourseRequest
 import com.example.enrollment.model.academic.CourseResponse
 import com.example.enrollment.model.academic.DepartmentRequest
@@ -38,7 +38,7 @@ interface ApiService {
 
     // PUBLIC ROUTES
     @POST("register")
-    suspend fun register(@Body registerRequest: RegisterCredentialDescriptionRequest): Response<RegisterResponse>
+    suspend fun register(@Body registerRequest: RegisterRequest): Response<RegisterResponse>
 
     @POST("login")
     suspend fun login(@Body loginRequest: LoginRequest): Response<LoginResponse>

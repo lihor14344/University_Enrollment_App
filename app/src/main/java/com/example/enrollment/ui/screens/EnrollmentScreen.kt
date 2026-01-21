@@ -18,12 +18,18 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.enrollment.viewmodel.EnrollState
+import com.example.enrollment.viewmodel.StudentViewModel
+import com.example.enrollment.model.student.EnrollmentRequest
 
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EnrollmentScreen(navController: NavHostController) {
+    val studentViewModel: StudentViewModel = viewModel()
+    val enrollState by studentViewModel.enrollState.collectAsState()
 
     var selectedYear by remember { mutableStateOf(2) }
     var studentId by remember { mutableStateOf("") }
@@ -521,8 +527,24 @@ fun EnrollmentScreen(navController: NavHostController) {
 
         Button(
             onClick = {
-                // payment action later
+                val studentIdInt = studentId.toIntOrNull() ?: 0
+                val majorId = 1 // TODO: map selectedMajor to ID
+                val semester = when (selectedPayment) {
+                    "Semester 1" -> "1"
+                    "Semester 2" -> "2"
+                    "Full Year" -> "full"
+                    else -> "1"
+                }
+                val enrollmentRequest = EnrollmentRequest(
+                    student_id = studentIdInt,
+                    major_id = majorId,
+                    semester = semester,
+                    year = selectedYear,
+                    status = "pending"
+                )
+                studentViewModel.enroll(enrollmentRequest)
             },
+            enabled = enrollState !is EnrollState.Loading,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
@@ -532,12 +554,17 @@ fun EnrollmentScreen(navController: NavHostController) {
                 containerColor = Color(0xFF4285F4)
             )
         ) {
-            Text(
-                text = "Make Payment",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
+            when (enrollState) {
+                is EnrollState.Loading -> CircularProgressIndicator(color = Color.White)
+                is EnrollState.Success -> Text("Enrolled Successfully!")
+                is EnrollState.Error -> Text("Retry Enrollment")
+                else -> Text(
+                    text = "Enroll Now",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
         }
 
     }
