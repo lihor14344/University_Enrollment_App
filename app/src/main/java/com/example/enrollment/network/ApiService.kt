@@ -14,6 +14,7 @@ import com.example.enrollment.model.auth.LoginRequest
 import com.example.enrollment.model.auth.LoginResponse
 import com.example.enrollment.model.auth.RegisterResponse
 import com.example.enrollment.model.common.ApiMessage
+import com.example.enrollment.model.common.News
 import com.example.enrollment.model.payment.CheckoutRequest
 import com.example.enrollment.model.payment.CheckoutResponse
 import com.example.enrollment.model.payment.PaymentResponse
@@ -253,4 +254,17 @@ interface ApiService {
 
     @DELETE("student/enrollment-courses/{enrollmentCourse}")
     suspend fun deleteEnrollmentCourse(@Path("enrollmentCourse") id: Int): Response<ApiMessage>
+
+    // STUDENT SPECIFIC ENDPOINTS
+    @GET("student/class-schedule")
+    suspend fun getClassSchedule(): Response<List<CourseResponse>>
+
+    @GET("student/scores")
+    suspend fun getStudentScores(): Response<List<EnrollmentCourseResponse>>
+
+    @GET("student/attendance")
+    suspend fun getStudentAttendance(): Response<List<EnrollmentCourseResponse>>
+
+    @GET("news")
+    suspend fun getNews(): Response<List<News>>
 }

@@ -13,28 +13,28 @@ import androidx.navigation.NavController
 import com.example.enrollment.data.AuthPreferences
 import com.example.enrollment.data.repository.AuthRepository
 import com.example.enrollment.data.repository.StudentRepository
-import com.example.enrollment.model.common.News
+import com.example.enrollment.model.payment.PaymentResponse
 import com.example.enrollment.ui.viewmodel.StudentViewModel
 import com.example.enrollment.ui.viewmodel.UiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewsScreen(navController: NavController) {
+fun PaymentsScreen(navController: NavController) {
     val authPreferences = remember { AuthPreferences(navController.context) }
     val studentRepository = remember { StudentRepository(authPreferences) }
     val authRepository = remember { AuthRepository(authPreferences) }
     val viewModel = remember { StudentViewModel(studentRepository, authRepository) }
 
-    val newsState by viewModel.newsState.collectAsState()
+    val paymentsState by viewModel.paymentsState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.loadNews()
+        viewModel.loadPayments()
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("University News") },
+                title = { Text("Payments") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
@@ -51,29 +51,29 @@ fun NewsScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            when (newsState) {
+            when (paymentsState) {
                 is UiState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is UiState.Success -> {
-                    val news = (newsState as UiState.Success<List<News>>).data
+                    val payments = (paymentsState as UiState.Success<List<PaymentResponse>>).data
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(16.dp)
                     ) {
-                        items(news) { newsItem ->
-                            NewsItem(newsItem)
+                        items(payments) { payment ->
+                            PaymentItem(payment)
                         }
                     }
                 }
                 is UiState.Error -> {
-                    val error = (newsState as UiState.Error).message
+                    val error = (paymentsState as UiState.Error).message
                     Column(
                         modifier = Modifier.align(Alignment.Center),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(text = "Error: $error", color = Color.Red)
-                        Button(onClick = { viewModel.loadNews() }) {
+                        Button(onClick = { viewModel.loadPayments() }) {
                             Text("Retry")
                         }
                     }
@@ -85,7 +85,7 @@ fun NewsScreen(navController: NavController) {
 }
 
 @Composable
-fun NewsItem(news: News) {
+fun PaymentItem(payment: PaymentResponse) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -93,11 +93,11 @@ fun NewsItem(news: News) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = news.title, style = MaterialTheme.typography.titleMedium)
+            Text(text = "Amount: $${payment.amount}", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = news.content, style = MaterialTheme.typography.bodyMedium)
+            Text(text = "Status: ${payment.status}", style = MaterialTheme.typography.bodyMedium)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "Published: ${news.created_at}", style = MaterialTheme.typography.bodySmall)
+            Text(text = "Date: ${payment.created_at}", style = MaterialTheme.typography.bodySmall)
         }
     }
 }

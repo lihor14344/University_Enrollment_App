@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.enrollment.ui.Auth.SignInForm
-import com.example.enrollment.ui.Auth.SignUpForm
+//import com.example.enrollment.ui.Auth.SignUpForm
 
 @Composable
 fun AuthScreen(navController: NavHostController) {

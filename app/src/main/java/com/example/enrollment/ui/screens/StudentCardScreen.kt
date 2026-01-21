@@ -33,7 +33,7 @@ import coil.compose.rememberAsyncImagePainter
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun StudentCardUploadScreen(navController: NavController) {
+fun StudentCardScreen(navController: NavController) {
     var state by remember { mutableStateOf(UploadState.UPLOAD) }
 
     Column(

@@ -13,28 +13,28 @@ import androidx.navigation.NavController
 import com.example.enrollment.data.AuthPreferences
 import com.example.enrollment.data.repository.AuthRepository
 import com.example.enrollment.data.repository.StudentRepository
-import com.example.enrollment.model.common.News
+import com.example.enrollment.model.academic.CourseResponse
 import com.example.enrollment.ui.viewmodel.StudentViewModel
 import com.example.enrollment.ui.viewmodel.UiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewsScreen(navController: NavController) {
+fun CoursesScreen(navController: NavController) {
     val authPreferences = remember { AuthPreferences(navController.context) }
     val studentRepository = remember { StudentRepository(authPreferences) }
     val authRepository = remember { AuthRepository(authPreferences) }
     val viewModel = remember { StudentViewModel(studentRepository, authRepository) }
 
-    val newsState by viewModel.newsState.collectAsState()
+    val coursesState by viewModel.coursesState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.loadNews()
+        viewModel.loadCourses()
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("University News") },
+                title = { Text("Courses") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
@@ -51,29 +51,29 @@ fun NewsScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            when (newsState) {
+            when (coursesState) {
                 is UiState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is UiState.Success -> {
-                    val news = (newsState as UiState.Success<List<News>>).data
+                    val courses = (coursesState as UiState.Success<List<CourseResponse>>).data
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(16.dp)
                     ) {
-                        items(news) { newsItem ->
-                            NewsItem(newsItem)
+                        items(courses) { course ->
+                            CourseItem(course)
                         }
                     }
                 }
                 is UiState.Error -> {
-                    val error = (newsState as UiState.Error).message
+                    val error = (coursesState as UiState.Error).message
                     Column(
                         modifier = Modifier.align(Alignment.Center),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(text = "Error: $error", color = Color.Red)
-                        Button(onClick = { viewModel.loadNews() }) {
+                        Button(onClick = { viewModel.loadCourses() }) {
                             Text("Retry")
                         }
                     }
@@ -85,7 +85,7 @@ fun NewsScreen(navController: NavController) {
 }
 
 @Composable
-fun NewsItem(news: News) {
+fun CourseItem(course: CourseResponse) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -93,11 +93,11 @@ fun NewsItem(news: News) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = news.title, style = MaterialTheme.typography.titleMedium)
+            Text(text = course.name, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = news.content, style = MaterialTheme.typography.bodyMedium)
+            Text(text = course.description ?: "", style = MaterialTheme.typography.bodyMedium)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "Published: ${news.created_at}", style = MaterialTheme.typography.bodySmall)
+            Text(text = "Credits: ${course.credits}", style = MaterialTheme.typography.bodySmall)
         }
     }
 }

@@ -24,32 +24,48 @@ fun AppNav() {
             HomeScreen(navController)
         }
 
-        composable("placeholder/{title}") { backStackEntry ->
-            val title = backStackEntry.arguments?.getString("title") ?: ""
-            PlaceholderScreen(navController, title)
-        }
-        composable("my_class") {
-            MyClassScreen(navController)
-        }
-        composable("enrollment") {
-            EnrollmentScreen(navController)
-        }
-        composable("news") {
-            NewsScreen(navController)
-        }
-        composable("student_card") {
-            StudentCardUploadScreen(navController)
-        }
         composable("profile") {
             UserProfileScreen(
-                onBack = { navController.popBackStack() }, // Go back to HomeScreen
+                onBack = { navController.popBackStack() },
                 onLogout = {
-                    // Handle logout (e.g., navigate to auth)
                     navController.navigate("auth") {
-                        popUpTo("home") { inclusive = true } // Clear HomeScreen from backstack
+                        popUpTo("home") { inclusive = true }
                     }
                 }
             )
+        }
+
+        composable("courses") {
+            CoursesScreen(navController)
+        }
+
+        composable("enrollments") {
+            EnrollmentsScreen(navController)
+        }
+
+        composable("class_schedule") {
+            ClassScheduleScreen(navController)
+        }
+
+        composable("payments") {
+            PaymentsScreen(navController)
+        }
+
+        composable("scores") {
+            ScoresScreen(navController)
+        }
+
+        composable("attendance") {
+            AttendanceScreen(navController)
+        }
+
+        composable("student_card") {
+            StudentCardScreen(navController)
+        }
+
+        composable("news") {
+            NewsScreen(navController)
+        }
         }
 
 

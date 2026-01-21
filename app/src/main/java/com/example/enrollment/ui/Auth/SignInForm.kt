@@ -11,12 +11,29 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.enrollment.data.AuthPreferences
+import com.example.enrollment.data.repository.AuthRepository
 
 @Composable
 fun SignInForm(navController: NavHostController) {
+    val authPreferences = remember { AuthPreferences(navController.context) }
+    val authRepository = remember { AuthRepository(authPreferences) }
+    val authViewModel: AuthViewModel = viewModel(factory = AuthViewModelFactory(authRepository))
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    val loginState by authViewModel.loginState.collectAsState()
+
+    // Handle login success
+    LaunchedEffect(loginState) {
+        if (loginState is LoginState.Success) {
+            navController.navigate("home") {
+                popUpTo("auth") { inclusive = true }
+            }
+        }
+    }
 
     Column {
         OutlinedTextField(
@@ -40,24 +57,36 @@ fun SignInForm(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        if (loginState is LoginState.Error) {
+            Text(
+                text = (loginState as LoginState.Error).message,
+                color = Color.Red,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+
         Button(
             onClick = {
-                navController.navigate("home") {
-                    popUpTo("auth") { inclusive = true }
-                }
+                authViewModel.login(email, password)
             },
-            enabled = email.isNotBlank() && password.isNotBlank(),
+            enabled = email.isNotBlank() && password.isNotBlank() && loginState !is LoginState.Loading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(45.dp),
             shape = RoundedCornerShape(14.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A237E))
         ) {
-            Text("Sign In")
+            if (loginState is LoginState.Loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = Color.White
+                )
+            } else {
+                Text("Sign In")
+            }
         }
     }
 }
-
 
 
 

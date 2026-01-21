@@ -157,15 +157,14 @@ fun HomeScreen(navController: NavController) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        // Connect My Class to actual screen
-                        HomeMenuItem("My Class", R.drawable.ic_class) {
-                            navController.navigate("my_class")
+                        HomeMenuItem("Profile", R.drawable.ic_profile) {
+                            navController.navigate("profile")
                         }
-                        HomeMenuItem("Enrollment", R.drawable.ic_enroll) {
-                            navController.navigate("enrollment")
+                        HomeMenuItem("Courses", R.drawable.ic_course) {
+                            navController.navigate("courses")
                         }
-                        HomeMenuItem("News", R.drawable.ic_news) {
-                            navController.navigate("news")
+                        HomeMenuItem("Enrollments", R.drawable.ic_enroll) {
+                            navController.navigate("enrollments")
                         }
                     }
 
@@ -175,15 +174,48 @@ fun HomeScreen(navController: NavController) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        HomeMenuItem("Card", R.drawable.ic_card) {
+                        HomeMenuItem("Class Schedule", R.drawable.ic_class) {
+                            navController.navigate("class_schedule")
+                        }
+                        HomeMenuItem("Payments", R.drawable.ic_payment) {
+                            navController.navigate("payments")
+                        }
+                        HomeMenuItem("Scores", R.drawable.ic_score) {
+                            navController.navigate("scores")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        HomeMenuItem("Attendance", R.drawable.ic_attendance) {
+                            navController.navigate("attendance")
+                        }
+                        HomeMenuItem("Student Card", R.drawable.ic_card) {
                             navController.navigate("student_card")
                         }
-                        HomeMenuItem("Attendance", R.drawable.ic_attendance) {
-                            navController.navigate("placeholder/Attendance")
+                        HomeMenuItem("News", R.drawable.ic_news) {
+                            navController.navigate("news")
                         }
-                        HomeMenuItem("Score", R.drawable.ic_score) {
-                            navController.navigate("placeholder/Score")
-                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Logout button
+                    Button(
+                        onClick = {
+                            // Handle logout - navigate to auth and clear backstack
+                            navController.navigate("auth") {
+                                popUpTo("home") { inclusive = true }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
+                        Text("Logout", color = Color.White)
                     }
 
                 }
