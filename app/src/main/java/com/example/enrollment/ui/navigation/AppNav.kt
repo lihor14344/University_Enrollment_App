@@ -10,7 +10,7 @@ fun AppNav() {
 
     NavHost(
         navController = navController,
-        startDestination = "welcome"
+        startDestination = "auth"
     ) {
         composable("welcome") {
             WelcomeScreen(navController)
@@ -39,6 +39,18 @@ fun AppNav() {
         }
         composable("student_card") {
             StudentCardUploadScreen(navController)
+        }
+        composable("courses") {
+            CoursesScreen(navController)
+        }
+        composable("payments") {
+            PaymentsScreen(navController)
+        }
+        composable("scores") {
+            ScoresScreen(navController)
+        }
+        composable("attendance") {
+            AttendanceScreen(navController)
         }
         composable("profile") {
             UserProfileScreen(

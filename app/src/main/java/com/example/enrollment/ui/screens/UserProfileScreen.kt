@@ -116,8 +116,17 @@ fun UserProfileScreen(onBack: () -> Boolean, onLogout: () -> Unit) {
 
 
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Phearom Ratha", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                Text("ID: 03085830", color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp)
+                when (profileState) {
+                    is ProfileState.Success -> {
+                        val profile = (profileState as ProfileState.Success).profile
+                        Text(profile.user.name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                        Text("ID: ${profile.student.student_id}", color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp)
+                    }
+                    else -> {
+                        Text("Loading...", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                        Text("ID: Loading...", color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp)
+                    }
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Box(
                     modifier = Modifier
@@ -166,24 +175,38 @@ fun UserProfileScreen(onBack: () -> Boolean, onLogout: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 if (selectedTab == "personal") {
-                    // Personal Info
-                    InfoCard(
-                        title = "Personal Information",
-                        items = listOf(
-                            InfoItem("Email", "ratha.phearom@rupp.edu.kh", InfoType.EMAIL),
-                            InfoItem("Phone", "+855 12 345 678", InfoType.PHONE),
-                            InfoItem("Date of Birth", "May 15, 2002", InfoType.DATE_OF_BIRTH)
-                        )
-                    )
+                    when (profileState) {
+                        is ProfileState.Success -> {
+                            val profile = (profileState as ProfileState.Success).profile
+                            // Personal Info
+                            InfoCard(
+                                title = "Personal Information",
+                                items = listOf(
+                                    InfoItem("Email", profile.user.email, InfoType.EMAIL),
+                                    InfoItem("Phone", profile.personalInformation?.phone ?: "N/A", InfoType.PHONE),
+                                    InfoItem("Date of Birth", profile.personalInformation?.dob ?: "N/A", InfoType.DATE_OF_BIRTH)
+                                )
+                            )
 
-                    InfoCard(
-                        title = "Academic Information",
-                        items = listOf(
-                            InfoItem("Faculty", "Faculty of Science", InfoType.FACULTY),
-                            InfoItem("Major", "Computer Science", InfoType.MAJOR),
-                            InfoItem("Enrollment Date", "September 1, 2021", InfoType.ENROLLMENT_DATE)
-                        )
-                    )
+                            InfoCard(
+                                title = "Academic Information",
+                                items = listOf(
+                                    InfoItem("Faculty", profile.academicInformation?.faculty ?: "N/A", InfoType.FACULTY),
+                                    InfoItem("Major", profile.academicInformation?.major ?: "N/A", InfoType.MAJOR),
+                                    InfoItem("Enrollment Date", profile.student.enrollment_date ?: "N/A", InfoType.ENROLLMENT_DATE)
+                                )
+                            )
+                        }
+                        is ProfileState.Loading -> {
+                            Text("Loading profile...", modifier = Modifier.padding(16.dp))
+                        }
+                        is ProfileState.Error -> {
+                            Text("Error loading profile: ${(profileState as ProfileState.Error).message}", modifier = Modifier.padding(16.dp))
+                        }
+                        else -> {
+                            Text("No profile data", modifier = Modifier.padding(16.dp))
+                        }
+                    }
 
                     PaymentCard(lastDate = "01-05-2021", lastAmount = "$300")
                 } else if (selectedTab == "settings") {

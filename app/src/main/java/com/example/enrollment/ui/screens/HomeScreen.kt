@@ -19,9 +19,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.enrollment.R
+import com.example.enrollment.network.ApiClient
+import com.example.enrollment.utils.PreferencesManager
 import com.example.enrollment.viewmodel.ProfileState
 import com.example.enrollment.viewmodel.StudentViewModel
 
@@ -224,10 +227,33 @@ fun HomeScreen(navController: NavController) {
                             navController.navigate("student_card")
                         }
                         HomeMenuItem("Attendance", R.drawable.ic_attendance) {
-                            navController.navigate("placeholder/Attendance")
+                            navController.navigate("attendance")
                         }
                         HomeMenuItem("Score", R.drawable.ic_score) {
-                            navController.navigate("placeholder/Score")
+                            navController.navigate("scores")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        HomeMenuItem("Courses", R.drawable.ic_class) {
+                            navController.navigate("courses")
+                        }
+                        HomeMenuItem("Payments", R.drawable.ic_enroll) {
+                            navController.navigate("payments")
+                        }
+                        HomeMenuItem("Logout", R.drawable.ic_news) {
+                            val context = LocalContext.current
+                            val prefs = PreferencesManager(context)
+                            prefs.clearToken()
+                            ApiClient.setAuthToken(null)
+                            navController.navigate("auth") {
+                                popUpTo("home") { inclusive = true }
+                            }
                         }
                     }
 

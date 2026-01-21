@@ -14,6 +14,11 @@ import com.example.enrollment.model.student.EnrollmentCourseResponse
 import com.example.enrollment.model.student.EnrollmentRequest
 import com.example.enrollment.model.student.EnrollmentResponse
 import com.example.enrollment.model.student.StudentCardResponse
+import com.example.enrollment.model.academic.ClassSchedule
+import com.example.enrollment.model.academic.Score
+import com.example.enrollment.model.student.Attendance
+import com.example.enrollment.model.common.News
+import com.example.enrollment.model.academic.CourseResponse
 import com.example.enrollment.repository.StudentRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,6 +60,21 @@ class StudentViewModel : ViewModel() {
 
     private val _paymentsState = MutableStateFlow<PaymentsState>(PaymentsState.Idle)
     val paymentsState: StateFlow<PaymentsState> = _paymentsState
+
+    private val _coursesState = MutableStateFlow<CoursesState>(CoursesState.Idle)
+    val coursesState: StateFlow<CoursesState> = _coursesState
+
+    private val _classScheduleState = MutableStateFlow<ClassScheduleState>(ClassScheduleState.Idle)
+    val classScheduleState: StateFlow<ClassScheduleState> = _classScheduleState
+
+    private val _scoresState = MutableStateFlow<ScoresState>(ScoresState.Idle)
+    val scoresState: StateFlow<ScoresState> = _scoresState
+
+    private val _attendanceState = MutableStateFlow<AttendanceState>(AttendanceState.Idle)
+    val attendanceState: StateFlow<AttendanceState> = _attendanceState
+
+    private val _newsState = MutableStateFlow<NewsState>(NewsState.Idle)
+    val newsState: StateFlow<NewsState> = _newsState
 
     fun fetchProfile() {
         _profileState.value = ProfileState.Loading
@@ -231,6 +251,86 @@ class StudentViewModel : ViewModel() {
             }
         }
     }
+
+    fun fetchCourses() {
+        _coursesState.value = CoursesState.Loading
+        viewModelScope.launch {
+            try {
+                val response = repository.getCourses()
+                if (response.isSuccessful) {
+                    _coursesState.value = CoursesState.Success(response.body()!!)
+                } else {
+                    _coursesState.value = CoursesState.Error("Failed to fetch courses: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                _coursesState.value = CoursesState.Error("Network error: ${e.message}")
+            }
+        }
+    }
+
+    fun fetchClassSchedule() {
+        _classScheduleState.value = ClassScheduleState.Loading
+        viewModelScope.launch {
+            try {
+                val response = repository.getClassSchedule()
+                if (response.isSuccessful) {
+                    _classScheduleState.value = ClassScheduleState.Success(response.body()!!)
+                } else {
+                    _classScheduleState.value = ClassScheduleState.Error("Failed to fetch class schedule: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                _classScheduleState.value = ClassScheduleState.Error("Network error: ${e.message}")
+            }
+        }
+    }
+
+    fun fetchScores() {
+        _scoresState.value = ScoresState.Loading
+        viewModelScope.launch {
+            try {
+                val response = repository.getScores()
+                if (response.isSuccessful) {
+                    _scoresState.value = ScoresState.Success(response.body()!!)
+                } else {
+                    _scoresState.value = ScoresState.Error("Failed to fetch scores: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                _scoresState.value = ScoresState.Error("Network error: ${e.message}")
+            }
+        }
+    }
+
+    fun fetchAttendance() {
+        _attendanceState.value = AttendanceState.Loading
+        viewModelScope.launch {
+            try {
+                val response = repository.getAttendance()
+                if (response.isSuccessful) {
+                    _attendanceState.value = AttendanceState.Success(response.body()!!)
+                } else {
+                    _attendanceState.value = AttendanceState.Error("Failed to fetch attendance: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                _attendanceState.value = AttendanceState.Error("Network error: ${e.message}")
+            }
+        }
+    }
+
+    fun fetchNews() {
+        _newsState.value = NewsState.Loading
+        viewModelScope.launch {
+            try {
+                val response = repository.getNews()
+                if (response.isSuccessful) {
+                    _newsState.value = NewsState.Success(response.body()!!)
+                } else {
+                    _newsState.value = NewsState.Error("Failed to fetch news: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                _newsState.value = NewsState.Error("Network error: ${e.message}")
+            }
+        }
+    }
 }
 
 sealed class ProfileState {
@@ -308,4 +408,39 @@ sealed class PaymentsState {
     object Loading : PaymentsState()
     data class Success(val payments: List<com.example.enrollment.model.payment.PaymentResponse>) : PaymentsState()
     data class Error(val message: String) : PaymentsState()
+}
+
+sealed class CoursesState {
+    object Idle : CoursesState()
+    object Loading : CoursesState()
+    data class Success(val courses: List<CourseResponse>) : CoursesState()
+    data class Error(val message: String) : CoursesState()
+}
+
+sealed class ClassScheduleState {
+    object Idle : ClassScheduleState()
+    object Loading : ClassScheduleState()
+    data class Success(val schedule: List<ClassSchedule>) : ClassScheduleState()
+    data class Error(val message: String) : ClassScheduleState()
+}
+
+sealed class ScoresState {
+    object Idle : ScoresState()
+    object Loading : ScoresState()
+    data class Success(val scores: List<Score>) : ScoresState()
+    data class Error(val message: String) : ScoresState()
+}
+
+sealed class AttendanceState {
+    object Idle : AttendanceState()
+    object Loading : AttendanceState()
+    data class Success(val attendance: List<Attendance>) : AttendanceState()
+    data class Error(val message: String) : AttendanceState()
+}
+
+sealed class NewsState {
+    object Idle : NewsState()
+    object Loading : NewsState()
+    data class Success(val news: List<News>) : NewsState()
+    data class Error(val message: String) : NewsState()
 }

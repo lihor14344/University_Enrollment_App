@@ -31,6 +31,10 @@ import com.example.enrollment.model.student.StudentRequest
 import com.example.enrollment.model.student.StudentResponse
 import com.example.enrollment.model.user.RoleRequest
 import com.example.enrollment.model.user.RoleResponse
+import com.example.enrollment.model.academic.ClassSchedule
+import com.example.enrollment.model.academic.Score
+import com.example.enrollment.model.student.Attendance
+import com.example.enrollment.model.common.News
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -253,4 +257,20 @@ interface ApiService {
 
     @DELETE("student/enrollment-courses/{enrollmentCourse}")
     suspend fun deleteEnrollmentCourse(@Path("enrollmentCourse") id: Int): Response<ApiMessage>
+
+    // CLASS SCHEDULE
+    @GET("student/class-schedule")
+    suspend fun getClassSchedule(): Response<List<ClassSchedule>>
+
+    // SCORES
+    @GET("student/scores")
+    suspend fun getScores(): Response<List<Score>>
+
+    // ATTENDANCE
+    @GET("student/attendance")
+    suspend fun getAttendance(): Response<List<Attendance>>
+
+    // NEWS
+    @GET("news")
+    suspend fun getNews(): Response<List<News>>
 }

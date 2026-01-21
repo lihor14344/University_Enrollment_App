@@ -12,6 +12,11 @@ import com.example.enrollment.model.student.EnrollmentCourseResponse
 import com.example.enrollment.model.student.EnrollmentRequest
 import com.example.enrollment.model.student.EnrollmentResponse
 import com.example.enrollment.model.student.StudentCardResponse
+import com.example.enrollment.model.academic.ClassSchedule
+import com.example.enrollment.model.academic.Score
+import com.example.enrollment.model.student.Attendance
+import com.example.enrollment.model.common.News
+import com.example.enrollment.model.academic.CourseResponse
 import com.example.enrollment.network.ApiClient
 import okhttp3.MultipartBody
 import retrofit2.Response
@@ -61,5 +66,25 @@ class StudentRepository {
 
     suspend fun getPayments(): Response<List<com.example.enrollment.model.payment.PaymentResponse>> {
         return apiService.getStudentPayments()
+    }
+
+    suspend fun getCourses(): Response<List<CourseResponse>> {
+        return apiService.getCourses()
+    }
+
+    suspend fun getClassSchedule(): Response<List<ClassSchedule>> {
+        return apiService.getClassSchedule()
+    }
+
+    suspend fun getScores(): Response<List<Score>> {
+        return apiService.getScores()
+    }
+
+    suspend fun getAttendance(): Response<List<Attendance>> {
+        return apiService.getAttendance()
+    }
+
+    suspend fun getNews(): Response<List<News>> {
+        return apiService.getNews()
     }
 }

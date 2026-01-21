@@ -1,12 +1,11 @@
 package com.example.enrollment.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -17,26 +16,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import com.example.enrollment.R
-import com.example.enrollment.model.common.News
-import com.example.enrollment.viewmodel.NewsState
+import androidx.navigation.NavController
+import com.example.enrollment.model.academic.CourseResponse
+import com.example.enrollment.viewmodel.CoursesState
 import com.example.enrollment.viewmodel.StudentViewModel
 
-// ------------------ MAIN SCREEN ------------------
 @Composable
-fun NewsScreen(navController: NavHostController) {
+fun CoursesScreen(navController: NavController) {
     val studentViewModel: StudentViewModel = viewModel()
-    val newsState by studentViewModel.newsState.collectAsState()
+    val coursesState by studentViewModel.coursesState.collectAsState()
 
     LaunchedEffect(Unit) {
-        studentViewModel.fetchNews()
+        studentViewModel.fetchCourses()
     }
 
     Column(
@@ -44,7 +39,7 @@ fun NewsScreen(navController: NavHostController) {
             .fillMaxSize()
             .background(Color(0xFFFFFFFF))
     ) {
-        // ---------- HEADER ----------
+        // Header
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -63,7 +58,7 @@ fun NewsScreen(navController: NavHostController) {
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                "University News",
+                "Courses",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
@@ -72,27 +67,27 @@ fun NewsScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        when (newsState) {
-            is NewsState.Loading -> {
+        when (coursesState) {
+            is CoursesState.Loading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
-            is NewsState.Success -> {
-                val newsList = (newsState as NewsState.Success).news
+            is CoursesState.Success -> {
+                val courses = (coursesState as CoursesState.Success).courses
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp)
                 ) {
-                    items(newsList) { news ->
-                        NewsCard(news, navController)
+                    items(courses) { course ->
+                        CourseCard(course)
                     }
                 }
             }
-            is NewsState.Error -> {
-                val error = (newsState as NewsState.Error).message
+            is CoursesState.Error -> {
+                val error = (coursesState as CoursesState.Error).message
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(text = error, color = Color.Red)
                 }
@@ -102,35 +97,32 @@ fun NewsScreen(navController: NavHostController) {
     }
 }
 
-// ------------------ NEWS CARD ------------------
 @Composable
-fun NewsCard(news: News, navController: NavHostController) {
+fun CourseCard(course: CourseResponse) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                // TODO: navigate to NewsDetailScreen later
-            }
-            .padding(vertical = 4.dp),
+            .fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD))
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(
-                news.title,
+                course.name,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFF1A237E)
             )
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(news.date, fontSize = 12.sp, color = Color.Gray)
-
-            Spacer(modifier = Modifier.height(8.dp))
-
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
-                news.content,
+                course.description ?: "No description",
                 fontSize = 14.sp,
-                color = Color.Black
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                "Credits: ${course.credits}",
+                fontSize = 12.sp,
+                color = Color.Gray
             )
         }
     }
