@@ -340,8 +340,6 @@ fun EnrollmentScreen(navController: NavHostController) {
                     }
                 }
 
-
-
                 Text("Class", fontSize = 12.sp)
 
                 OutlinedTextField(
