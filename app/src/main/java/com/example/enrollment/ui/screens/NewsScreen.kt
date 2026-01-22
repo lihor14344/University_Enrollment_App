@@ -36,12 +36,7 @@ fun NewsScreen(navController: NavController) {
             TopAppBar(
                 title = { Text("University News") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = androidx.compose.material.icons.Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
+
                 }
             )
         }

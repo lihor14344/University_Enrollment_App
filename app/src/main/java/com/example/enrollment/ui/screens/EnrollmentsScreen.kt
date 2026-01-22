@@ -37,10 +37,7 @@ fun EnrollmentsScreen(navController: NavController) {
                 title = { Text("My Enrollments") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = androidx.compose.material.icons.Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
+
                     }
                 }
             )
@@ -92,12 +89,6 @@ fun EnrollmentItem(enrollment: EnrollmentResponse) {
             .padding(vertical = 4.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = enrollment.course?.name ?: "Unknown Course", style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "Status: ${enrollment.status}", style = MaterialTheme.typography.bodyMedium)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "Enrolled: ${enrollment.created_at}", style = MaterialTheme.typography.bodySmall)
-        }
+
     }
 }

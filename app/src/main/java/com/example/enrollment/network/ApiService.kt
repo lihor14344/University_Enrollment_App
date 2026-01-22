@@ -262,6 +262,9 @@ interface ApiService {
     @GET("student/scores")
     suspend fun getStudentScores(): Response<List<EnrollmentCourseResponse>>
 
+    @GET("student/attendance")
+    suspend fun getStudentAttendance(): Response<List<EnrollmentCourseResponse>>
+
     @GET("news")
     suspend fun getNews(): Response<List<News>>
 }

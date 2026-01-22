@@ -44,6 +44,16 @@ fun PaymentsScreen(navController: NavController) {
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = {
+                navController.navigate("qr_scanner")
+            }) {
+                Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Filled.QrCodeScanner,
+                    contentDescription = "Scan QR Code"
+                )
+            }
         }
     ) { padding ->
         Box(
@@ -97,7 +107,7 @@ fun PaymentItem(payment: PaymentResponse) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = "Status: ${payment.status}", style = MaterialTheme.typography.bodyMedium)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "Date: ${payment.created_at}", style = MaterialTheme.typography.bodySmall)
+
         }
     }
 }

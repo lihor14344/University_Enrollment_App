@@ -37,10 +37,7 @@ fun ScoresScreen(navController: NavController) {
                 title = { Text("Scores") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = androidx.compose.material.icons.Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
+
                     }
                 }
             )
@@ -92,12 +89,6 @@ fun ScoreItem(score: EnrollmentCourseResponse) {
             .padding(vertical = 4.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = score.course?.name ?: "Unknown Course", style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "Score: ${score.score ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "Grade: ${score.grade ?: "N/A"}", style = MaterialTheme.typography.bodySmall)
-        }
+
     }
 }

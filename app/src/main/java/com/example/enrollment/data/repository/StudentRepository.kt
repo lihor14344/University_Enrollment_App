@@ -1,6 +1,7 @@
 package com.example.enrollment.data.repository
 
 import com.example.enrollment.data.AuthPreferences
+import com.example.enrollment.data.StaticData
 import com.example.enrollment.model.academic.CourseResponse
 import com.example.enrollment.model.common.News
 import com.example.enrollment.model.payment.CheckoutRequest
@@ -16,7 +17,7 @@ import com.example.enrollment.model.student.EnrollmentResponse
 import com.example.enrollment.model.student.StudentCardResponse
 import com.example.enrollment.network.ApiClient
 import com.example.enrollment.network.ApiService
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.delay
 import okhttp3.MultipartBody
 import retrofit2.Response
 
@@ -28,7 +29,10 @@ class StudentRepository(private val authPreferences: AuthPreferences) {
 
     // Profile
     suspend fun getProfile(): Result<ProfileResponse> {
-        return handleApiCall { apiService.getProfile() }
+        return handleApiCall(
+            apiCall = { apiService.getProfile() },
+            fallbackData = StaticData.sampleProfile
+        )
     }
 
     suspend fun updateProfile(request: ProfileUpdateRequest): Result<Unit> {
@@ -37,7 +41,10 @@ class StudentRepository(private val authPreferences: AuthPreferences) {
 
     // Courses
     suspend fun getCourses(): Result<List<CourseResponse>> {
-        return handleApiCall { apiService.getCourses() }
+        return handleApiCall(
+            apiCall = { apiService.getCourses() },
+            fallbackData = StaticData.sampleCourses
+        )
     }
 
     // Enrollments
@@ -46,17 +53,26 @@ class StudentRepository(private val authPreferences: AuthPreferences) {
     }
 
     suspend fun getEnrollments(): Result<List<EnrollmentResponse>> {
-        return handleApiCall { apiService.getMyEnrollments() }
+        return handleApiCall(
+            apiCall = { apiService.getMyEnrollments() },
+            fallbackData = StaticData.sampleEnrollments
+        )
     }
 
     // Class Schedule
     suspend fun getClassSchedule(): Result<List<CourseResponse>> {
-        return handleApiCall { apiService.getClassSchedule() }
+        return handleApiCall(
+            apiCall = { apiService.getClassSchedule() },
+            fallbackData = StaticData.sampleClassSchedule
+        )
     }
 
     // Payments
     suspend fun getPayments(): Result<List<PaymentResponse>> {
-        return handleApiCall { apiService.getStudentPayments() }
+        return handleApiCall(
+            apiCall = { apiService.getStudentPayments() },
+            fallbackData = StaticData.samplePayments
+        )
     }
 
     suspend fun checkoutPayment(request: CheckoutRequest): Result<CheckoutResponse> {
@@ -69,7 +85,18 @@ class StudentRepository(private val authPreferences: AuthPreferences) {
 
     // Scores
     suspend fun getScores(): Result<List<EnrollmentCourseResponse>> {
-        return handleApiCall { apiService.getStudentScores() }
+        return handleApiCall(
+            apiCall = { apiService.getStudentScores() },
+            fallbackData = StaticData.sampleScores
+        )
+    }
+
+    // Attendance
+    suspend fun getAttendance(): Result<List<EnrollmentCourseResponse>> {
+        return handleApiCall(
+            apiCall = { apiService.getStudentAttendance() },
+            fallbackData = StaticData.sampleScores // Use scores data as attendance fallback
+        )
     }
 
     // Student Card
@@ -83,11 +110,15 @@ class StudentRepository(private val authPreferences: AuthPreferences) {
 
     // News
     suspend fun getNews(): Result<List<News>> {
-        return handleApiCall { apiService.getNews() }
+        return handleApiCall(
+            apiCall = { apiService.getNews() },
+            fallbackData = StaticData.sampleNews
+        )
     }
 
     private suspend fun <T> handleApiCall(
-        apiCall: suspend () -> Response<T>
+        apiCall: suspend () -> Response<T>,
+        fallbackData: T? = null
     ): Result<T> {
         return try {
             val response = apiCall()
@@ -95,10 +126,14 @@ class StudentRepository(private val authPreferences: AuthPreferences) {
                 response.body()?.let { Result.success(it) }
                     ?: Result.failure(Exception("Response body is null"))
             } else {
-                Result.failure(Exception("API call failed: ${response.message()}"))
+                // Use fallback data if API fails and fallback is provided
+                fallbackData?.let { Result.success(it) }
+                    ?: Result.failure(Exception("API call failed: ${response.message()}"))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            // Use fallback data if network fails and fallback is provided
+            fallbackData?.let { Result.success(it) }
+                ?: Result.failure(e)
         }
     }
 

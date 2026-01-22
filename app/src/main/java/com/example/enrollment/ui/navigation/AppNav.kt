@@ -35,17 +35,13 @@ fun AppNav() {
             )
         }
 
-        composable("courses") {
-            CoursesScreen(navController)
-        }
+   
 
         composable("enrollments") {
             EnrollmentsScreen(navController)
         }
 
-        composable("class_schedule") {
-            ClassScheduleScreen(navController)
-        }
+
 
         composable("payments") {
             PaymentsScreen(navController)
@@ -55,6 +51,10 @@ fun AppNav() {
             ScoresScreen(navController)
         }
 
+        composable("attendance") {
+            AttendanceScreen(navController)
+        }
+
         composable("student_card") {
             StudentCardScreen(navController)
         }
@@ -62,11 +62,18 @@ fun AppNav() {
         composable("news") {
             NewsScreen(navController)
         }
+
+        composable("qr_scanner") {
+            QRCodeScanner(navController) { scannedData ->
+                // Handle scanned QR code data
+                // This would typically navigate back to payment screen with the data
+            }
+        }
         }
 
 
     }
-}
+
 
 
 
