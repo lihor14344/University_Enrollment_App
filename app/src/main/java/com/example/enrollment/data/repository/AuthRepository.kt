@@ -5,24 +5,30 @@ import com.example.enrollment.model.auth.LoginRequest
 import com.example.enrollment.model.auth.LoginResponse
 import com.example.enrollment.network.ApiClient
 import com.example.enrollment.network.ApiService
-import kotlinx.coroutines.flow.first
 import retrofit2.Response
 
-class AuthRepository(private val authPreferences: AuthPreferences) {
+class AuthRepository(
+    private val authPreferences: AuthPreferences
+) {
 
     private val apiService: ApiService by lazy {
-        ApiClient.create(authPreferences.getCurrentToken()).create(ApiService::class.java)
+        ApiClient.create(authPreferences.getCurrentToken())
+            .create(ApiService::class.java)
     }
 
     suspend fun login(loginRequest: LoginRequest): Result<LoginResponse> {
         return try {
-            val response = apiService.studentLogin(loginRequest)
+            val response: Response<LoginResponse> = apiService.studentLogin(loginRequest)
+
             if (response.isSuccessful) {
-                response.body()?.let { loginResponse ->
-                    // Save token
-                    authPreferences.saveAuthToken(loginResponse.token)
-                    Result.success(loginResponse)
-                } ?: Result.failure(Exception("Login response body is null"))
+                val body = response.body()
+                if (body != null) {
+                    // Save token for future requests
+                    authPreferences.saveAuthToken(body.token)
+                    Result.success(body)
+                } else {
+                    Result.failure(Exception("Login response body is null"))
+                }
             } else {
                 Result.failure(Exception("Login failed: ${response.message()}"))
             }

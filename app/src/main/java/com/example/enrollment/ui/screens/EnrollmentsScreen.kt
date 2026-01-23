@@ -31,6 +31,16 @@ fun EnrollmentsScreen(navController: NavController) {
         viewModel.loadEnrollments()
     }
 
+    // Auto logout on 401
+    LaunchedEffect(enrollmentsState) {
+        if (enrollmentsState is UiState.Error && (enrollmentsState as UiState.Error).message.contains("Unauthorized")) {
+            viewModel.logout()
+            navController.navigate("auth") {
+                popUpTo("home") { inclusive = true }
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(

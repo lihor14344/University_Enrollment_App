@@ -6,10 +6,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,7 +30,8 @@ import com.example.enrollment.ui.viewmodel.UiState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileScreen(onBack: () -> Unit, onLogout: () -> Unit) {
-    val authPreferences = remember { AuthPreferences(navController = null) } // We don't need navController here
+    val context = LocalContext.current
+    val authPreferences = remember { AuthPreferences(context) }
     val studentRepository = remember { StudentRepository(authPreferences) }
     val authRepository = remember { AuthRepository(authPreferences) }
     val viewModel = remember { StudentViewModel(studentRepository, authRepository) }
@@ -38,6 +42,14 @@ fun UserProfileScreen(onBack: () -> Unit, onLogout: () -> Unit) {
         viewModel.loadProfile()
     }
 
+    // Auto logout on 401
+    LaunchedEffect(profileState) {
+        if (profileState is UiState.Error && (profileState as UiState.Error).message.contains("Unauthorized")) {
+            viewModel.logout()
+            onLogout()
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -45,7 +57,7 @@ fun UserProfileScreen(onBack: () -> Unit, onLogout: () -> Unit) {
                 navigationIcon = {
                     IconButton(onClick = { onBack() }) {
                         Icon(
-                            imageVector = androidx.compose.material.icons.Icons.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -75,11 +87,11 @@ fun UserProfileScreen(onBack: () -> Unit, onLogout: () -> Unit) {
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
-                                Text(text = "Name: ${profile.name}", style = MaterialTheme.typography.titleMedium)
+                                Text(text = "Name: ${profile.user?.name ?: "Unknown"}", style = MaterialTheme.typography.titleMedium)
                                 Spacer(modifier = Modifier.height(8.dp))
-                                Text(text = "Email: ${profile.email}", style = MaterialTheme.typography.bodyMedium)
+                                Text(text = "Email: ${profile.user?.email ?: "Unknown"}", style = MaterialTheme.typography.bodyMedium)
                                 Spacer(modifier = Modifier.height(8.dp))
-                                Text(text = "Phone: ${profile.phone ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
+                                Text(text = "Student ID: ${profile.student?.student_code ?: "Unknown"}", style = MaterialTheme.typography.bodyMedium)
                             }
                         }
 
@@ -87,7 +99,10 @@ fun UserProfileScreen(onBack: () -> Unit, onLogout: () -> Unit) {
 
                         // Logout Button
                         Button(
-                            onClick = { onLogout() },
+                            onClick = {
+                                viewModel.logout()
+                                onLogout()
+                            },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                         ) {

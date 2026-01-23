@@ -1,16 +1,21 @@
 package com.example.enrollment.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.navigation.compose.*
+import com.example.enrollment.data.AuthPreferences
+import com.example.enrollment.ui.Auth.AuthScreen
 import com.example.enrollment.ui.screens.*
 
 @Composable
 fun AppNav() {
     val navController = rememberNavController()
+    val authPreferences = remember { AuthPreferences(navController.context) }
+    val isLoggedIn = authPreferences.getCurrentToken() != null
 
     NavHost(
         navController = navController,
-        startDestination = "welcome"
+        startDestination = if (isLoggedIn) "home" else "welcome"
     ) {
         composable("welcome") {
             WelcomeScreen(navController)
@@ -29,7 +34,7 @@ fun AppNav() {
                 onBack = { navController.popBackStack() },
                 onLogout = {
                     navController.navigate("auth") {
-                        popUpTo("home") { inclusive = true }
+                        popUpTo("welcome") { inclusive = true }
                     }
                 }
             )
@@ -41,18 +46,16 @@ fun AppNav() {
             EnrollmentsScreen(navController)
         }
 
+        composable("my_class") {
+            MyClassScreen(navController)
+        }
 
+        composable("courses") {
+            PlaceholderScreen(navController, "Courses")
+        }
 
         composable("payments") {
             PaymentsScreen(navController)
-        }
-
-        composable("scores") {
-            ScoresScreen(navController)
-        }
-
-        composable("attendance") {
-            AttendanceScreen(navController)
         }
 
         composable("student_card") {
@@ -61,6 +64,28 @@ fun AppNav() {
 
         composable("news") {
             NewsScreen(navController)
+        }
+
+        composable("faculty_selection") {
+            FacultySelectionScreen(navController)
+        }
+
+        composable("major_selection/{facultyId}") { backStackEntry ->
+            val facultyId = backStackEntry.arguments?.getString("facultyId")?.toIntOrNull() ?: 1
+            MajorSelectionScreen(navController, facultyId)
+        }
+
+        composable("course_selection/{majorId}") { backStackEntry ->
+            val majorId = backStackEntry.arguments?.getString("majorId")?.toIntOrNull() ?: 1
+            CourseSelectionScreen(navController, majorId)
+        }
+
+        composable("payment_checkout") {
+            PaymentCheckoutScreen(navController)
+        }
+
+        composable("payment_success") {
+            PaymentSuccessScreen(navController)
         }
 
         composable("qr_scanner") {

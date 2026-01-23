@@ -5,5 +5,6 @@ data class CourseResponse(
     val major_id: Int,
     val code: String,
     val name: String,
-    val credit: Int
+    val credit: Int,
+    val price: Double? = null
 )

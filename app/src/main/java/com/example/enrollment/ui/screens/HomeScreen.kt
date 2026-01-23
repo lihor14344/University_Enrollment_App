@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,14 +20,44 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.enrollment.R
+import com.example.enrollment.data.AuthPreferences
+import com.example.enrollment.data.repository.AuthRepository
+import com.example.enrollment.data.repository.StudentRepository
+import com.example.enrollment.ui.viewmodel.StudentViewModel
+import com.example.enrollment.ui.viewmodel.StudentViewModelFactory
+import com.example.enrollment.ui.viewmodel.UiState
+import com.example.enrollment.model.profile.ProfileResponse
 
 
 
 
 @Composable
 fun HomeScreen(navController: NavController) {
+    val context = LocalContext.current
+    val authPreferences = remember { AuthPreferences(context) }
+    val authRepository = remember { AuthRepository(authPreferences) }
+    val studentRepository = remember { StudentRepository(authPreferences) }
+    val studentViewModel: StudentViewModel = viewModel(factory = StudentViewModelFactory(studentRepository, authRepository))
+    val profileState by studentViewModel.profileState.collectAsState()
+    val prefs = remember { AuthPreferences(context) }
+
+    LaunchedEffect(Unit) {
+        studentViewModel.loadProfile()
+    }
+
+    // Auto logout on 401
+    LaunchedEffect(profileState) {
+        if (profileState is UiState.Error && (profileState as UiState.Error).message.contains("Unauthorized")) {
+            prefs.clearAuthToken()
+            navController.navigate("auth") {
+                popUpTo("home") { inclusive = true }
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -122,16 +156,53 @@ fun HomeScreen(navController: NavController) {
                                 .background(Color.Gray),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("R", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            when (profileState) {
+                                is UiState.Success -> {
+                                    val profile = (profileState as UiState.Success<ProfileResponse>).data
+                                    val user = profile.user
+                                    val name = user?.name ?: "User"
+                                    val initial = name.firstOrNull()?.toString() ?: "U"
+                                    Text(initial, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                }
+                                else -> Text("U", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
                         }
 
                         Spacer(modifier = Modifier.width(4.dp))
 
-                        Text(
-                            text = "Ratha Phaeron",
-                            fontSize = 12.sp,
-                            color = Color.Gray
-                        )
+                        when (profileState) {
+                            is UiState.Success -> {
+                                val profile = (profileState as UiState.Success<ProfileResponse>).data
+                                val user = profile.user
+                                val name = user?.name ?: "User"
+                                Text(
+                                    text = name,
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                            is UiState.Loading -> {
+                                Text(
+                                    text = "Loading...",
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                            is UiState.Error -> {
+                                Text(
+                                    text = (profileState as UiState.Error).message,
+                                    fontSize = 12.sp,
+                                    color = Color.Red
+                                )
+                            }
+                            else -> {
+                                Text(
+                                    text = "User",
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -157,45 +228,12 @@ fun HomeScreen(navController: NavController) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        HomeMenuItem("Profile", R.drawable.ic_profile) {
-                            navController.navigate("profile")
+                        // Connect My Class to actual screen
+                        HomeMenuItem("My Class", R.drawable.ic_class) {
+                            navController.navigate("my_class")
                         }
-                        HomeMenuItem("Courses", R.drawable.ic_course) {
-                            navController.navigate("courses")
-                        }
-                        HomeMenuItem("Enrollments", R.drawable.ic_enroll) {
+                        HomeMenuItem("Enrollment", R.drawable.ic_enroll) {
                             navController.navigate("enrollments")
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        HomeMenuItem("Class Schedule", R.drawable.ic_class) {
-                            navController.navigate("class_schedule")
-                        }
-                        HomeMenuItem("Payments", R.drawable.ic_payment) {
-                            navController.navigate("payments")
-                        }
-                        HomeMenuItem("Scores", R.drawable.ic_score) {
-                            navController.navigate("scores")
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        HomeMenuItem("Attendance", R.drawable.ic_attendance) {
-                            navController.navigate("attendance")
-                        }
-                        HomeMenuItem("Student Card", R.drawable.ic_card) {
-                            navController.navigate("student_card")
                         }
                         HomeMenuItem("News", R.drawable.ic_news) {
                             navController.navigate("news")
@@ -204,18 +242,39 @@ fun HomeScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Logout button
-                    Button(
-                        onClick = {
-                            // Handle logout - navigate to auth and clear backstack
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        HomeMenuItem("Card", R.drawable.ic_card) {
+                            navController.navigate("student_card")
+                        }
+                        HomeMenuItem("Enrollments", R.drawable.ic_enroll) {
+                            navController.navigate("enrollments")
+                        }
+                        HomeMenuItem("Payments", R.drawable.ic_payment) {
+                            navController.navigate("payments")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        HomeMenuItem("Courses", R.drawable.ic_class) {
+                            navController.navigate("courses")
+                        }
+                        HomeMenuItem("Payments", R.drawable.ic_enroll) {
+                            navController.navigate("payments")
+                        }
+                        HomeMenuItem("Logout", R.drawable.ic_news) {
+                            prefs.clearAuthToken()
                             navController.navigate("auth") {
                                 popUpTo("home") { inclusive = true }
                             }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                    ) {
-                        Text("Logout", color = Color.White)
+                        }
                     }
 
                 }
@@ -261,4 +320,3 @@ fun HomeMenuItem(
         }
     }
 }
-

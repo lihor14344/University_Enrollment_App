@@ -7,7 +7,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
 
-    private const val BASE_URL = "http://127.0.0.1:8000/api/"
+    // Use 10.0.2.2 for emulator, your PC IP for physical device
+    private const val BASE_URL = "http://10.0.2.2:8000/api/"
 
     fun create(token: String? = null): Retrofit {
         val logging = HttpLoggingInterceptor().apply {

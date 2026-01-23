@@ -31,6 +31,16 @@ fun NewsScreen(navController: NavController) {
         viewModel.loadNews()
     }
 
+    // Auto logout on 401
+    LaunchedEffect(newsState) {
+        if (newsState is UiState.Error && (newsState as UiState.Error).message.contains("Unauthorized")) {
+            viewModel.logout()
+            navController.navigate("auth") {
+                popUpTo("home") { inclusive = true }
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(

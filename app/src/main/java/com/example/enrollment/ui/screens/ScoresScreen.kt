@@ -1,43 +1,22 @@
 package com.example.enrollment.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.enrollment.data.AuthPreferences
-import com.example.enrollment.data.repository.AuthRepository
-import com.example.enrollment.data.repository.StudentRepository
-import com.example.enrollment.model.student.EnrollmentCourseResponse
-import com.example.enrollment.ui.viewmodel.StudentViewModel
-import com.example.enrollment.ui.viewmodel.UiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScoresScreen(navController: NavController) {
-    val authPreferences = remember { AuthPreferences(navController.context) }
-    val studentRepository = remember { StudentRepository(authPreferences) }
-    val authRepository = remember { AuthRepository(authPreferences) }
-    val viewModel = remember { StudentViewModel(studentRepository, authRepository) }
-
-    val scoresState by viewModel.scoresState.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.loadScores()
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Scores") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-
+                        // Icon can be added here
                     }
                 }
             )
@@ -46,49 +25,10 @@ fun ScoresScreen(navController: NavController) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(padding),
+            contentAlignment = Alignment.Center
         ) {
-            when (scoresState) {
-                is UiState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-                is UiState.Success -> {
-                    val scores = (scoresState as UiState.Success<List<EnrollmentCourseResponse>>).data
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp)
-                    ) {
-                        items(scores) { score ->
-                            ScoreItem(score)
-                        }
-                    }
-                }
-                is UiState.Error -> {
-                    val error = (scoresState as UiState.Error).message
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(text = "Error: $error", color = Color.Red)
-                        Button(onClick = { viewModel.loadScores() }) {
-                            Text("Retry")
-                        }
-                    }
-                }
-                UiState.Idle -> {}
-            }
+            Text("Scores feature is not available.")
         }
-    }
-}
-
-@Composable
-fun ScoreItem(score: EnrollmentCourseResponse) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-
     }
 }

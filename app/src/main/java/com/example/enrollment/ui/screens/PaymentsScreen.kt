@@ -3,6 +3,9 @@ package com.example.enrollment.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,6 +34,16 @@ fun PaymentsScreen(navController: NavController) {
         viewModel.loadPayments()
     }
 
+    // Auto logout on 401
+    LaunchedEffect(paymentsState) {
+        if (paymentsState is UiState.Error && (paymentsState as UiState.Error).message.contains("Unauthorized")) {
+            viewModel.logout()
+            navController.navigate("auth") {
+                popUpTo("home") { inclusive = true }
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -38,7 +51,7 @@ fun PaymentsScreen(navController: NavController) {
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
-                            imageVector = androidx.compose.material.icons.Icons.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -50,7 +63,7 @@ fun PaymentsScreen(navController: NavController) {
                 navController.navigate("qr_scanner")
             }) {
                 Icon(
-                    imageVector = androidx.compose.material.icons.Icons.Filled.QrCodeScanner,
+                    imageVector = Icons.Filled.Add,
                     contentDescription = "Scan QR Code"
                 )
             }
@@ -65,7 +78,7 @@ fun PaymentsScreen(navController: NavController) {
                 is UiState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                is UiState.Success -> {
+                is UiState.Success<*> -> {
                     val payments = (paymentsState as UiState.Success<List<PaymentResponse>>).data
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
